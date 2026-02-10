@@ -30,7 +30,7 @@ public class Main {
         line = br.readLine();
         while (line != null) {
             String[] parts = line.split(":");
-            patterns.insert(
+            patterns.addPattern(
                     parts[0],
                     new Pattern(parts[0], Arrays.asList(parts[1].split(" ")))
             );
@@ -50,37 +50,33 @@ public class Main {
 
             String c = sc.nextLine();
 
-            if (c.equals("1")) {
-                System.out.print("Nouvelle racine: ");
-                String r = sc.nextLine();
-                rootNode = tree.insert(rootNode, new RootData(r));
-                System.out.println("Racine ajoutée.");
-            }
+            switch (c) {
+                case "1" -> {
+                    System.out.print("Nouvelle racine: ");
+                    String r = sc.nextLine();
+                    rootNode = tree.insert(rootNode, new RootData(r));
+                    System.out.println("Racine ajoutée.");
+                }
+                case "2" -> {
+                    System.out.print("Racine à supprimer: ");
+                    String r = sc.nextLine();
+                    rootNode = tree.delete(rootNode, r);
+                    System.out.println("Suppression terminée.");
+                }
+                case "3" -> {
+                    System.out.print("Racine à rechercher: ");
+                    String r = sc.nextLine();
 
-            else if (c.equals("2")) {
-                System.out.print("Racine à supprimer: ");
-                String r = sc.nextLine();
-                rootNode = tree.delete(rootNode, r);
-                System.out.println("Suppression terminée.");
-            }
-
-            else if (c.equals("3")) {
-                System.out.print("Racine à rechercher: ");
-                String r = sc.nextLine();
-
-                RootData d = tree.search(rootNode, r);
-                if (d != null)
-                    System.out.println("Racine trouvée: " + d.root);
-                else
-                    System.out.println("Racine introuvable.");
-            }
-
-            else if (c.equals("4")) {
-                tree.display(rootNode);
-            }
-
-            else if (c.equals("0")) {
-                return;
+                    RootData d = tree.search(rootNode, r);
+                    if (d != null)
+                        System.out.println("Racine trouvée: " + d.root);
+                    else
+                        System.out.println("Racine introuvable.");
+                }
+                case "4" -> tree.display(rootNode);
+                case "0" -> {
+                    return;
+                }
             }
         }
     }
@@ -97,48 +93,46 @@ public class Main {
 
             String c = sc.nextLine();
 
-            if (c.equals("1")) {
-                System.out.print("Nom du schème: ");
-                String name = sc.nextLine();
+            switch (c) {
+                case "1" -> {
+                    System.out.print("Nom du schème: ");
+                    String name = sc.nextLine();
 
-                System.out.print("Formes (séparées par espace): ");
-                List<String> forms = Arrays.asList(sc.nextLine().split(" "));
+                    System.out.print("Formes (séparées par espace): ");
+                    List<String> forms = Arrays.asList(sc.nextLine().split(" "));
 
-                patterns.addPattern(name, new Pattern(name, forms));
-                System.out.println("Schème ajouté.");
-            }
-
-            else if (c.equals("2")) {
-                System.out.print("Nom du schème à modifier: ");
-                String name = sc.nextLine();
-
-                System.out.print("Nouvelles formes: ");
-                List<String> forms = Arrays.asList(sc.nextLine().split(" "));
-
-                boolean ok = patterns.updatePattern(name, new Pattern(name, forms));
-
-                if (ok) System.out.println("Schème modifié.");
-                else System.out.println("Schème introuvable.");
-            }
-
-            else if (c.equals("3")) {
-                System.out.print("Nom du schème à supprimer: ");
-                String name = sc.nextLine();
-
-                boolean ok = patterns.deletePattern(name);
-
-                if (ok) System.out.println("Schème supprimé.");
-                else System.out.println("Schème introuvable.");
-            }
-
-            else if (c.equals("4")) {
-                for (Pattern p : patterns.values()) {
-                    System.out.println(p.name + " -> " + p.template);
+                    patterns.addPattern(name, new Pattern(name, forms));
+                    System.out.println("Schème ajouté.");
                 }
-            }
+                case "2" -> {
+                    System.out.print("Nom du schème à modifier: ");
+                    String name = sc.nextLine();
 
-            else if (c.equals("0")) {
-                return;
+                    System.out.print("Nouvelles formes: ");
+                    List<String> forms = Arrays.asList(sc.nextLine().split(" "));
+
+                    boolean ok = patterns.updatePattern(name, new Pattern(name, forms));
+
+                    if (ok) System.out.println("Schème modifié.");
+                    else System.out.println("Schème introuvable.");
+                }
+                case "3" -> {
+                    System.out.print("Nom du schème à supprimer: ");
+                    String name = sc.nextLine();
+
+                    boolean ok = patterns.deletePattern(name);
+
+                    if (ok) System.out.println("Schème supprimé.");
+                    else System.out.println("Schème introuvable.");
+                }
+                case "4" -> {
+                    for (Pattern p : patterns.values()) {
+                        System.out.println(p.name + " -> " + p.template);
+                    }
+                }
+                case "0" -> {
+                    return;
+                }
             }
         }
     }
@@ -152,10 +146,12 @@ public class Main {
 
         label:
         while (true) {
-            System.out.println("\n1. Gestion des racines");
+            System.out.println("\n--- Menu Principal ---");
+            System.out.println("1. Gestion des racines");
             System.out.println("2. Gestion des schèmes");
             System.out.println("3. Générer dérivés");
             System.out.println("4. Valider mot");
+            System.out.println("5. Générer mot spécifique");
             System.out.println("0. Quitter");
 
             String c = sc.nextLine();
@@ -178,9 +174,18 @@ public class Main {
                     }
 
                     for (Pattern p : patterns.values()) {
-                        String w = MorphEngine.generateWord(r, p);
-                        d.derivatives.put(w, d.derivatives.getOrDefault(w, 0) + 1);
-                        System.out.println(p.name + " → " + w);
+                        if (d.derivatives.containsKey(p.name)) {
+                            String w = d.derivatives.get(p.name);
+                            System.out.println(r + " + " + p.name + " → "
+                                    + w + " (déjà existant)");
+                        }
+                        else {
+                            String w = MorphEngine.generateWord(r, p);
+                            d.derivatives.put(p.name, w);
+
+                            System.out.println(r + " + " + p.name + " → "
+                                    + w + " (généré)");
+                        }
                     }
                     break;
                 }
@@ -199,6 +204,56 @@ public class Main {
 
                     break;
                 }
+                case "5": {
+                    System.out.print("Racine: ");
+                    String r = sc.nextLine();
+
+                    System.out.print("Nom du schème: ");
+                    String pname = sc.nextLine();
+
+                    Pattern selected = null;
+                    for (Pattern p : patterns.values()) {
+                        if (p.name.equals(pname)) {
+                            selected = p;
+                            break;
+                        }
+                    }
+
+                    if (selected == null) {
+                        System.out.println("Schème introuvable.");
+                        break;
+                    }
+
+
+                    RootData d = tree.search(rootNode, r);
+
+                    if (d == null) {
+                        String w = MorphEngine.generateWord(r, selected);
+                        System.out.println("Racine: "+ r +"Shéma morphologique: "+selected.name+ "--> Mot généré: " + w);
+
+                        System.out.println("Racine introuvable. Ajouter ? (o/n)");
+                        String rep = sc.nextLine();
+
+                        if (rep.equalsIgnoreCase("o")) {
+                            rootNode = tree.insert(rootNode, new RootData(r));
+                            d = tree.search(rootNode, r);
+                            d.derivatives.put(selected.name, w);
+                            System.out.println("Racine ajoutée.");
+                        }
+                    }
+                    else{
+                        if (d.derivatives.containsKey(selected.name)) {
+                            System.out.println("Mot existant: "
+                                    + d.derivatives.get(selected.name));
+                        } else {
+                            String w = MorphEngine.generateWord(r, selected);
+                            d.derivatives.put(selected.name, w);
+                            System.out.println("Mot généré: " + w);
+                        }
+                    }
+                    break;
+                }
+
                 case "0":
                     break label;
             }

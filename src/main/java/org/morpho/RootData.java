@@ -5,7 +5,7 @@ import java.util.Map;
 
 public class RootData {
     public String root;
-    public Map<String, Integer> derivatives;
+    public Map<String, String> derivatives;
 
     public RootData(String root) {
         this.root = root;

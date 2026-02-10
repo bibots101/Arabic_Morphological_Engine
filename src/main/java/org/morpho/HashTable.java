@@ -16,10 +16,7 @@ public class HashTable {
     }
 
     private int hash(String key) {
-        int h = 0;
-        for (char c : key.toCharArray())
-            h += c;
-        return h % size;
+        return Math.abs(key.hashCode()) % size;
     }
 
     public void addPattern(String key, Pattern value) {
