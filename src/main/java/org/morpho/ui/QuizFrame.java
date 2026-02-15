@@ -115,17 +115,33 @@ public class QuizFrame extends JFrame {
         }
 
         Random rand = new Random();
+        int attempts = 0;
+        int maxAttempts = totalQuestions * 10;
 
-        for (int i = 0; i < totalQuestions; i++) {
+        while (questions.size() < totalQuestions && attempts < maxAttempts) {
+            attempts++;
             // Randomly choose between generation and validation questions
             boolean isGeneration = rand.nextBoolean();
             
             String root = roots.get(rand.nextInt(roots.size()));
-            Pattern pattern = patterns.get(rand.nextInt(patterns.size()));
+            int rootLength = root.length();
+            if (rootLength != 3 && rootLength != 4) {
+                continue;
+            }
+
+            List<Pattern> lengthPatterns = getEnabledPatternsForLength(rootLength);
+            if (lengthPatterns.isEmpty()) {
+                continue;
+            }
+
+            Pattern pattern = lengthPatterns.get(rand.nextInt(lengthPatterns.size()));
 
             if (isGeneration) {
                 // Generation question: "Generate word from root X using pattern Y"
                 String correctAnswer = level.generateWord(root, pattern.name);
+                if (correctAnswer == null) {
+                    continue;
+                }
                 questions.add(new QuizQuestion(
                     "Generate a word from root '" + root + "' using pattern '" + pattern.name + "'",
                     correctAnswer,
@@ -134,12 +150,19 @@ public class QuizFrame extends JFrame {
             } else {
                 // Validation question: "What is the root of word X?"
                 String word = level.generateWord(root, pattern.name);
+                if (word == null) {
+                    continue;
+                }
                 questions.add(new QuizQuestion(
                     "What is the root of the word '" + word + "'?",
                     root,
                     pattern.name
                 ));
             }
+        }
+
+        if (questions.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "No compatible quiz questions could be generated!");
         }
     }
 
@@ -151,6 +174,8 @@ public class QuizFrame extends JFrame {
             answerField.setEnabled(true);
             submitButton.setEnabled(true);
             nextButton.setEnabled(false);
+        } else {
+            showResults();
         }
     }
 
@@ -243,5 +268,16 @@ public class QuizFrame extends JFrame {
             this.correctAnswer = correctAnswer;
             this.patternName = patternName;
         }
+    }
+
+    private List<Pattern> getEnabledPatternsForLength(int length) {
+        List<Pattern> filtered = new ArrayList<>();
+        for (Pattern p : level.getEnabledPatterns()) {
+            int size = p.verifyPattern(p);
+            if (size == length) {
+                filtered.add(p);
+            }
+        }
+        return filtered;
     }
 }

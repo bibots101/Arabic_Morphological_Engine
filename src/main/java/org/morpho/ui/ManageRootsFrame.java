@@ -128,16 +128,16 @@ public class ManageRootsFrame extends JFrame {
         }
 
         String root = JOptionPane.showInputDialog(this,
-            "Enter the new root (3 Arabic letters):",
+            "Enter the new root (3 or 4 Arabic letters):",
             "Add Root",
             JOptionPane.PLAIN_MESSAGE);
 
         if (root != null && !root.trim().isEmpty()) {
             root = root.trim();
             
-            if (root.length() != 3) {
+            if (root.length() != 3 && root.length() != 4) {
                 JOptionPane.showMessageDialog(this,
-                    "Root must be exactly 3 letters!",
+                    "Root must be exactly 3 or 4 letters!",
                     "Invalid Root", JOptionPane.ERROR_MESSAGE);
                 return;
             }

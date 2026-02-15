@@ -42,7 +42,7 @@ public class PracticeValidationFrame extends JFrame {
         wordField.setFont(new Font("Arial", Font.PLAIN, 16));
         inputPanel.add(wordField);
 
-        inputPanel.add(new JLabel("Enter Root (3 letters):"));
+        inputPanel.add(new JLabel("Enter Root (3 or 4 letters):"));
         rootField = new JTextField();
         rootField.setFont(new Font("Arial", Font.PLAIN, 16));
         inputPanel.add(rootField);
@@ -97,8 +97,8 @@ public class PracticeValidationFrame extends JFrame {
             return;
         }
 
-        if (root.length() != 3) {
-            JOptionPane.showMessageDialog(this, "Root must be exactly 3 letters!");
+        if (!isValidRootLength(root)) {
+            JOptionPane.showMessageDialog(this, "Root must be exactly 3 or 4 letters!");
             return;
         }
 
@@ -142,14 +142,13 @@ public class PracticeValidationFrame extends JFrame {
             return;
         }
 
-        List<org.morpho.Pattern> patterns = level.getEnabledPatterns();
-        if (patterns.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "No patterns enabled!");
-            return;
-        }
-
         // Generate a valid word for the student to validate
         String randomRoot = roots.get((int) (Math.random() * roots.size()));
+        List<org.morpho.Pattern> patterns = getEnabledPatternsForLength(randomRoot.length());
+        if (patterns.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "No patterns available for this root length!");
+            return;
+        }
         org.morpho.Pattern randomPattern = patterns.get((int) (Math.random() * patterns.size()));
         
         String generatedWord = level.generateWord(randomRoot, randomPattern.name);
@@ -169,5 +168,21 @@ public class PracticeValidationFrame extends JFrame {
         resultLabel.setText("Result will appear here");
         resultLabel.setForeground(Color.BLACK);
         feedbackArea.setText("");
+    }
+
+    private boolean isValidRootLength(String root) {
+        int length = root.length();
+        return length == 3 || length == 4;
+    }
+
+    private List<org.morpho.Pattern> getEnabledPatternsForLength(int length) {
+        List<org.morpho.Pattern> filtered = new java.util.ArrayList<>();
+        for (org.morpho.Pattern p : level.getEnabledPatterns()) {
+            int size = p.verifyPattern(p);
+            if (size == length) {
+                filtered.add(p);
+            }
+        }
+        return filtered;
     }
 }

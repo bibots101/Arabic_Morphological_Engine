@@ -3,7 +3,10 @@ package org.morpho.ui;
 import org.morpho.*;
 import org.morpho.level.*;
 import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -17,6 +20,7 @@ public class PracticeGenerationFrame extends JFrame {
     private JComboBox<String> patternCombo;
     private JLabel resultLabel;
     private JTextArea explanationArea;
+    private JLabel rootHelperLabel;
 
     public PracticeGenerationFrame(LevelManager manager, Level level) {
         this.manager = manager;
@@ -36,21 +40,38 @@ public class PracticeGenerationFrame extends JFrame {
         mainPanel.add(titleLabel, BorderLayout.NORTH);
 
         // Input panel
-        JPanel inputPanel = new JPanel(new GridLayout(5, 2, 10, 10));
-        
-        inputPanel.add(new JLabel("Enter Root (3 letters):"));
+        JPanel inputPanel = new JPanel(new GridLayout(6, 2, 10, 10));
+
+        inputPanel.add(new JLabel("Enter Root: (3 or 4 letters)"));
         rootField = new JTextField();
         rootField.setFont(new Font("Arial", Font.PLAIN, 16));
         inputPanel.add(rootField);
 
+        rootHelperLabel = new JLabel(" ");
+        rootHelperLabel.setForeground(Color.RED);
+        inputPanel.add(new JLabel(""));
+        inputPanel.add(rootHelperLabel);
+
+
         inputPanel.add(new JLabel("Select Pattern:"));
         patternCombo = new JComboBox<>();
-        
-        // Populate with enabled patterns only
-        List<Pattern> enabledPatterns = level.getEnabledPatterns();
-        for (Pattern p : enabledPatterns) {
-            patternCombo.addItem(p.name);
-        }
+        updatePatternComboForRoot();
+        rootField.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                updatePatternComboForRoot();
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                updatePatternComboForRoot();
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                updatePatternComboForRoot();
+            }
+        });
         inputPanel.add(patternCombo);
 
         JButton generateButton = new JButton("Generate Word");
@@ -102,8 +123,8 @@ public class PracticeGenerationFrame extends JFrame {
             return;
         }
 
-        if (root.length() != 3) {
-            JOptionPane.showMessageDialog(this, "Root must be exactly 3 letters!");
+        if (root.length() != 3 && root.length() != 4) {
+            JOptionPane.showMessageDialog(this, "Root must be exactly 3 or 4 letters!");
             return;
         }
 
@@ -124,18 +145,23 @@ public class PracticeGenerationFrame extends JFrame {
 
     private void randomExercise() {
         List<String> roots = level.getAllRoots();
-        List<Pattern> patterns = level.getEnabledPatterns();
 
-        if (roots.isEmpty() || patterns.isEmpty()) {
+        if (roots.isEmpty()) {
             JOptionPane.showMessageDialog(this, "No roots or patterns available!");
             return;
         }
 
-        // Pick random root and pattern
+        // Pick random root and a matching pattern
         String randomRoot = roots.get((int) (Math.random() * roots.size()));
+        List<Pattern> patterns = getEnabledPatternsForLength(randomRoot.length());
+        if (patterns.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "No patterns available for this root length!");
+            return;
+        }
         Pattern randomPattern = patterns.get((int) (Math.random() * patterns.size()));
 
         rootField.setText(randomRoot);
+        updatePatternComboForRoot();
         patternCombo.setSelectedItem(randomPattern.name);
         
         resultLabel.setText("Try to generate the word, then click 'Generate Word' to check!");
@@ -148,6 +174,11 @@ public class PracticeGenerationFrame extends JFrame {
 
         if (root.isEmpty() || patternName == null) {
             JOptionPane.showMessageDialog(this, "Generate a word first!");
+            return;
+        }
+
+        if (root.length() != 3 && root.length() != 4) {
+            JOptionPane.showMessageDialog(this, "Root must be exactly 3 or 4 letters!");
             return;
         }
 
@@ -169,7 +200,50 @@ public class PracticeGenerationFrame extends JFrame {
         explanation.append("ف (first letter) → ").append(root.charAt(0)).append("\n");
         explanation.append("ع (second letter) → ").append(root.charAt(1)).append("\n");
         explanation.append("ل (third letter) → ").append(root.charAt(2)).append("\n");
+        if (root.length() == 4) {
+            explanation.append("ل2 (fourth letter) → ").append(root.charAt(3)).append("\n");
+        }
 
         explanationArea.setText(explanation.toString());
+    }
+
+    private List<Pattern> getEnabledPatternsForLength(int length) {
+        List<Pattern> filtered = new ArrayList<>();
+        for (Pattern p : level.getEnabledPatterns()) {
+            int size = p.verifyPattern(p);
+            if (size == length) {
+                filtered.add(p);
+            }
+        }
+        return filtered;
+    }
+
+    private void updatePatternComboForRoot() {
+        String root = rootField.getText().trim();
+        int length = root.length();
+        String currentSelection = (String) patternCombo.getSelectedItem();
+
+        if (length == 3 || length == 4) {
+            rootHelperLabel.setText(" ");
+        } else {
+            rootHelperLabel.setText("Root length must be 3 or 4 letters.");
+        }
+
+        patternCombo.removeAllItems();
+        if (length != 3 && length != 4) {
+            return;
+        }
+
+        for (Pattern p : level.getEnabledPatterns()) {
+            int size = p.verifyPattern(p);
+            if (size != length) {
+                continue;
+            }
+            patternCombo.addItem(p.name);
+        }
+
+        if (currentSelection != null) {
+            patternCombo.setSelectedItem(currentSelection);
+        }
     }
 }

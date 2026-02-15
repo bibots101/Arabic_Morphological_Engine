@@ -137,7 +137,7 @@ public class ManagePatternsFrame extends JFrame {
                     
                     // Show template
                     JLabel templateLabel = new JLabel("Template: " + pattern.template);
-                    templateLabel.setFont(new Font("Arial", Font.ITALIC, 11));
+                    templateLabel.setFont(new Font("Tahoma", Font.PLAIN, 14));
                     templateLabel.setForeground(Color.GRAY);
                     rowPanel.add(templateLabel);
                     
