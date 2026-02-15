@@ -12,7 +12,7 @@ public class Main {
 
     public static void loadRoots() throws Exception {
         BufferedReader br = new BufferedReader(
-                new InputStreamReader(new FileInputStream("src/main/data/hamza_roots.txt"), StandardCharsets.UTF_8));
+                new InputStreamReader(new FileInputStream("src/main/data/roots.txt"), StandardCharsets.UTF_8));
         String line;
         line = br.readLine();
         while (line != null) {
