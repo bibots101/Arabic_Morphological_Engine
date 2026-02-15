@@ -1,9 +1,9 @@
 package org.morpho;
 
 public class AVLNode {
-    RootData data;
-    AVLNode left;
-    AVLNode right;
+    public RootData data;
+    public AVLNode left;
+    public AVLNode right;
 
     public AVLNode(RootData data) {
         this.data = data;
