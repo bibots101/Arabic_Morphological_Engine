@@ -1,6 +1,5 @@
 package org.morpho;
 
-import com.sun.tools.jconsole.JConsoleContext;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -142,7 +141,7 @@ public class Main {
         loadRoots();
         loadPatterns();
 
-        Scanner sc = new Scanner(System.in, "UTF-8");
+        Scanner sc = new Scanner(System.in, StandardCharsets.UTF_8);
 
         label:
         while (true) {
@@ -169,23 +168,32 @@ public class Main {
                     RootData d = tree.search(rootNode, r);
 
                     if (d == null) {
-                        System.out.println("Racine introuvable");
-                        continue;
+                        System.out.println("Racine introuvable. Ajouter ? (o/n)");
+                        String rep = sc.nextLine();
+
+                        if (rep.equalsIgnoreCase("o")) {
+                            rootNode = tree.insert(rootNode, new RootData(r));
+                            d = tree.search(rootNode, r);
+                            System.out.println("Racine ajoutée.");
+                        }
                     }
 
                     for (Pattern p : patterns.values()) {
-                        if (d.derivatives.containsKey(p.name)) {
+                        if (d != null && d.derivatives.containsKey(p.name)) {
                             String w = d.derivatives.get(p.name);
+                            if(w == null) continue;
                             System.out.println(r + " + " + p.name + " → "
                                     + w + " (déjà existant)");
                         }
                         else {
                             String w = MorphEngine.generateWord(r, p);
-                            d.derivatives.put(p.name, w);
+                            if(w == null) continue;
+                            if (d != null) d.derivatives.put(p.name, w);
 
                             System.out.println(r + " + " + p.name + " → "
                                     + w + " (généré)");
                         }
+
                     }
                     break;
                 }
