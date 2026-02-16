@@ -137,7 +137,7 @@ public class Main {
     }
 
 
-    static void main(String[] args) throws Exception {
+    public static void main(String[] args) throws Exception {
         loadRoots();
         loadPatterns();
 
