@@ -10,32 +10,64 @@ public class Main {
     static AVLNode rootNode = tree.root;
     static HashTable patterns = new HashTable();
 
-    public static void loadRoots() throws Exception {
-        BufferedReader br = new BufferedReader(
-                new InputStreamReader(new FileInputStream("src/main/data/roots.txt"), StandardCharsets.UTF_8));
-        String line;
-        line = br.readLine();
-        while (line != null) {
-            rootNode = tree.insert(rootNode, new RootData(line.trim()));
-            line = br.readLine();
+    public static void loadRoots() {
+        try (BufferedReader br = new BufferedReader(
+                new InputStreamReader(new FileInputStream("src/main/data/roots.txt"), StandardCharsets.UTF_8))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                String trimmedLine = line.trim();
+                if (!trimmedLine.isEmpty()) { // Skip empty lines
+                    rootNode = tree.insert(rootNode, new RootData(trimmedLine));
+                }
+            }
+            System.out.println("Roots loaded successfully.");
+        } catch (FileNotFoundException e) {
+            System.err.println("ERROR: Roots file not found");
+            System.err.println("Please ensure the data directory exists with the roots.txt file.");
+        } catch (IOException e) {
+            System.err.println("ERROR: Failed to read roots file: " + e.getMessage());
+        } catch (Exception e) {
+            System.err.println("ERROR: Unexpected error while loading roots: " + e.getMessage());
+            e.printStackTrace();
         }
-        br.close();
     }
 
-    public static void loadPatterns() throws Exception {
-        BufferedReader br = new BufferedReader(
-                new InputStreamReader(new FileInputStream("src/main/data/patterns.txt"), StandardCharsets.UTF_8));
-        String line;
-        line = br.readLine();
-        while (line != null) {
-            String[] parts = line.split(":");
-            patterns.addPattern(
-                    parts[0],
-                    new Pattern(parts[0], Arrays.asList(parts[1].split(" ")))
-            );
-            line = br.readLine();
+    public static void loadPatterns() {
+        try (BufferedReader br = new BufferedReader(
+                new InputStreamReader(new FileInputStream("src/main/data/patterns.txt"), StandardCharsets.UTF_8))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                String trimmedLine = line.trim();
+                if (trimmedLine.isEmpty() || trimmedLine.startsWith("#")) continue; // Skip empty lines and comments
+
+                String[] parts = trimmedLine.split(":");
+                if (parts.length != 2) {
+                    System.err.println("WARNING: Invalid pattern format (expected 'name:template'): " + trimmedLine);
+                    continue;
+                }
+
+                String patternName = parts[0].trim();
+                String[] templateParts = parts[1].trim().split(" ");
+                if (templateParts.length == 0) {
+                    System.err.println("WARNING: Pattern '" + patternName + "' has no template elements.");
+                    continue;
+                }
+
+                patterns.addPattern(
+                        patternName,
+                        new Pattern(patternName, Arrays.asList(templateParts))
+                );
+            }
+            System.out.println("✓ Patterns loaded successfully.");
+        } catch (FileNotFoundException e) {
+            System.err.println("ERROR: Patterns file not found");
+            System.err.println("Please ensure the data directory exists with the patterns.txt file.");
+        } catch (IOException e) {
+            System.err.println("ERROR: Failed to read patterns file: " + e.getMessage());
+        } catch (Exception e) {
+            System.err.println("ERROR: Unexpected error while loading patterns: " + e.getMessage());
+            e.printStackTrace();
         }
-        br.close();
     }
 
     static void rootsMenu(Scanner sc) {
@@ -137,7 +169,7 @@ public class Main {
     }
 
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         loadRoots();
         loadPatterns();
 
