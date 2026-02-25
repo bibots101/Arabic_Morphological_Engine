@@ -132,7 +132,7 @@ public class Main {
                     System.out.print("Formes (séparées par espace): ");
                     List<String> forms = Arrays.asList(sc.nextLine().split(" "));
 
-                    patterns.addPattern(name, new Pattern(name, forms));
+                    patterns.insert(name, new Pattern(name, forms));
                     System.out.println("Schème ajouté.");
                 }
                 case "2" -> {
